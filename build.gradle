@@ -18,6 +18,18 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+    maven {
+        name 'Maven for PR #2039' // https://github.com/neoforged/NeoForge/pull/2039
+        url 'https://prmaven.neoforged.net/NeoForge/pr2039'
+        content {
+            includeModule('net.neoforged', 'neoforge')
+            includeModule('net.neoforged', 'testframework')
+        }
+    }
+    maven {
+        url "https://maven.su5ed.dev/releases"
+    }
+
 }
 
 base {
@@ -30,11 +42,8 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 neoForge {
     // Specify the version of NeoForge to use.
     version = project.neo_version
+    interfaceInjectionData.from(file("src/main/resources/interface_injections.json"))
 
-    parchment {
-        mappingsVersion = project.parchment_mappings_version
-        minecraftVersion = project.parchment_minecraft_version
-    }
 
     // This line is optional. Access Transformers are automatically detected
     // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
@@ -55,23 +64,6 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
-        // This run config launches GameTestServer and runs all registered gametests, then exits.
-        // By default, the server will crash when no gametests are provided.
-        // The gametest system is also enabled by default for other run configs under the /test command.
-        gameTestServer {
-            type = "gameTestServer"
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        data {
-            data()
-
-            // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
-            // gameDirectory = project.file('run-data')
-
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-        }
 
         // applies to all the run configs above
         configureEach {
@@ -112,6 +104,8 @@ configurations {
 }
 
 dependencies {
+    implementation("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19")
+    jarJar("org.sinytra.forgified-fabric-api:fabric-api-base:0.4.42+d1308ded19")
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
@@ -185,5 +179,14 @@ idea {
     module {
         downloadSources = true
         downloadJavadoc = true
+    }
+}
+
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+
+    copy {
+        from("src/main/resources/neoforge.mods.toml")
+        into("build/generated/sources/modMetadata/neoforge.mods.toml")
     }
 }
