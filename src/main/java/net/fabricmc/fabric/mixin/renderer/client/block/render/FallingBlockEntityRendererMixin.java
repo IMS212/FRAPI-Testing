@@ -16,7 +16,6 @@
 
 package net.fabricmc.fabric.mixin.renderer.client.block.render;
 
-import net.fabricmc.fabric.api.renderer.v1.render.FabricBlockModelRenderer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -56,7 +55,7 @@ abstract class FallingBlockEntityRendererMixin extends EntityRenderer<FallingBlo
 
 			BlockStateModel model = dispatcher.getBlockModel(blockState);
 			long seed = blockState.getSeed(renderState.startBlockPos);
-			((FabricBlockModelRenderer) dispatcher.getModelRenderer()).render(renderState, model, blockState, renderState.blockPos, matrixStack, layer -> vertexConsumers.getBuffer(RenderLayerHelper.getMovingBlockLayer(layer)), false, seed, OverlayTexture.NO_OVERLAY);
+			dispatcher.getModelRenderer().render(renderState, model, blockState, renderState.blockPos, matrixStack, RenderLayerHelper.movingDelegate(vertexConsumers), false, seed, OverlayTexture.NO_OVERLAY);
 
 			matrixStack.popPose();
 			super.render(renderState, matrixStack, vertexConsumers, light);

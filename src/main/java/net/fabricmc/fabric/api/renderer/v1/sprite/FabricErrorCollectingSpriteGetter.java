@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.mixin.renderer.client.item;
+package net.fabricmc.fabric.api.renderer.v1.sprite;
 
-import org.spongepowered.asm.mixin.Mixin;
-import net.fabricmc.fabric.api.renderer.v1.render.FabricLayerRenderState;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
+import net.minecraft.client.resources.model.SpriteGetter;
+import net.minecraft.resources.ResourceLocation;
 
-@Mixin(ItemStackRenderState.LayerRenderState.class)
-abstract class LayerRenderStateMixin implements FabricLayerRenderState {
+/**
+ * Note: This interface is automatically implemented on {@link SpriteGetter} via Mixin and interface injection.
+ */
+public interface FabricErrorCollectingSpriteGetter {
+	/**
+	 * {@return the sprite finder for the given atlas ID}
+	 */
+	default SpriteFinder spriteFinder(ResourceLocation atlasId) {
+		throw new UnsupportedOperationException();
+	}
 }

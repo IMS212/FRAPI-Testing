@@ -17,8 +17,10 @@
 package net.fabricmc.fabric.api.renderer.v1.render;
 
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class RenderLayerHelper {
@@ -26,18 +28,40 @@ public final class RenderLayerHelper {
 	}
 
 	/**
-	 * Same logic as {@link ItemBlockRenderTypes#getMovingBlockRenderType}, but accepts a {@link RenderType} from
-	 * {@link RenderType#chunkBufferLayers()} instead of a {@link BlockState}.
+	 * Same logic as {@link ItemBlockRenderTypes#getMovingBlockRenderType}, but accepts a {@link ChunkSectionLayer} instead of a
+	 * {@link BlockState}.
 	 */
-	public static RenderType getMovingBlockLayer(RenderType chunkRenderLayer) {
-		return chunkRenderLayer == RenderType.translucent() ? RenderType.translucentMovingBlock() : chunkRenderLayer;
+	public static RenderType getMovingBlockLayer(ChunkSectionLayer layer) {
+		return switch (layer) {
+		case SOLID -> RenderType.solid();
+		case CUTOUT_MIPPED -> RenderType.cutoutMipped();
+		case CUTOUT -> RenderType.cutout();
+		case TRANSLUCENT -> RenderType.translucentMovingBlock();
+		case TRIPWIRE -> RenderType.tripwire();
+		};
 	}
 
 	/**
-	 * Same logic as {@link ItemBlockRenderTypes#getRenderType}, but accepts a {@link RenderType} from
-	 * {@link RenderType#chunkBufferLayers()} instead of a {@link BlockState}.
+	 * Same logic as {@link ItemBlockRenderTypes#getRenderType}, but accepts a {@link ChunkSectionLayer} instead of a
+	 * {@link BlockState}.
 	 */
-	public static RenderType getEntityBlockLayer(RenderType chunkRenderLayer) {
-		return chunkRenderLayer == RenderType.translucent() ? Sheets.translucentItemSheet() : Sheets.cutoutBlockSheet();
+	public static RenderType getEntityBlockLayer(ChunkSectionLayer layer) {
+		return layer == ChunkSectionLayer.TRANSLUCENT ? Sheets.translucentItemSheet() : Sheets.cutoutBlockSheet();
+	}
+
+	/**
+	 * Wraps the given provider, converting {@link ChunkSectionLayer}s to render layers using
+	 * {@link #getMovingBlockLayer(ChunkSectionLayer)}.
+	 */
+	public static BlockVertexConsumerProvider movingDelegate(MultiBufferSource vertexConsumers) {
+		return layer -> vertexConsumers.getBuffer(RenderLayerHelper.getMovingBlockLayer(layer));
+	}
+
+	/**
+	 * Wraps the given provider, converting {@link ChunkSectionLayer}s to render layers using
+	 * {@link #getEntityBlockLayer(ChunkSectionLayer)}.
+	 */
+	public static BlockVertexConsumerProvider entityDelegate(MultiBufferSource vertexConsumers) {
+		return layer -> vertexConsumers.getBuffer(RenderLayerHelper.getEntityBlockLayer(layer));
 	}
 }

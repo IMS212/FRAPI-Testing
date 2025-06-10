@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.impl.renderer;
+package net.fabricmc.fabric.mixin.renderer.client.block.model;
 
-import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
-import net.minecraft.client.resources.model.SpriteGetter;
+import java.util.List;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.model.multipart.MultiPartModel;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface BasicItemModelExtension {
-	void fabric_setMesh(Mesh mesh, SpriteGetter spriteGetter);
+@Mixin(MultiPartModel.SharedBakedState.class)
+public interface MultipartBlockStateModelMultipartBakedModelAccessor {
+	@Accessor("selectors")
+	List<MultiPartModel.Selector<BlockStateModel>> getSelectors();
 }

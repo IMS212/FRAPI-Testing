@@ -19,30 +19,22 @@ package net.fabricmc.fabric.api.renderer.v1;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
-import java.util.function.Predicate;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
-import net.fabricmc.fabric.api.renderer.v1.material.MaterialFinder;
-import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableMesh;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
-import net.fabricmc.fabric.api.renderer.v1.model.FabricBlockModelPart;
+import net.fabricmc.fabric.api.renderer.v1.render.BlockVertexConsumerProvider;
 import net.fabricmc.fabric.api.renderer.v1.render.FabricBlockModelRenderer;
 import net.fabricmc.fabric.api.renderer.v1.render.FabricBlockRenderManager;
 import net.fabricmc.fabric.api.renderer.v1.render.FabricLayerRenderState;
 import net.fabricmc.fabric.impl.renderer.RendererManager;
-import net.fabricmc.fabric.impl.renderer.VanillaBlockModelPartEncoder;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.chunk.SectionCompiler;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
@@ -98,57 +90,22 @@ public interface Renderer {
 	MutableMesh mutableMesh();
 
 	/**
-	 * Obtain a new {@link MaterialFinder} instance to retrieve standard {@link RenderMaterial}
-	 * instances.
-	 *
-	 * <p>Renderer does not retain a reference to returned instances, so they should be re-used for
-	 * multiple materials when possible to avoid memory allocation overhead.
-	 */
-	MaterialFinder materialFinder();
-
-	/**
-	 * Return a material previously registered via {@link #registerMaterial(ResourceLocation, RenderMaterial)}.
-	 * Will return null if no material was found matching the given identifier.
-	 */
-	@Nullable
-	RenderMaterial materialById(ResourceLocation id);
-
-	/**
-	 * Register a material for re-use by other mods or models within a mod.
-	 * The registry does not persist registrations - mods must create and register
-	 * all materials at game initialization.
-	 *
-	 * <p>Returns false if a material with the given identifier is already present,
-	 * leaving the existing material intact.
-	 */
-	boolean registerMaterial(ResourceLocation id, RenderMaterial material);
-
-	/**
-	 * @see FabricBlockModelRenderer#render(BlockAndTintGetter, BlockStateModel, BlockState, BlockPos, PoseStack, MultiBufferSource, boolean, long, int)
+	 * @see FabricBlockModelRenderer#render(BlockAndTintGetter, BlockStateModel, BlockState, BlockPos, PoseStack, BlockVertexConsumerProvider, boolean, long, int)
 	 */
 	@ApiStatus.OverrideOnly
-	void render(ModelBlockRenderer modelRenderer, BlockAndTintGetter blockView, BlockStateModel model, BlockState state, BlockPos pos, PoseStack matrices, MultiBufferSource vertexConsumers, boolean cull, long seed, int overlay);
+	void render(ModelBlockRenderer modelRenderer, BlockAndTintGetter blockView, BlockStateModel model, BlockState state, BlockPos pos, PoseStack matrices, BlockVertexConsumerProvider vertexConsumers, boolean cull, long seed, int overlay);
 
 	/**
-	 * @see FabricBlockModelRenderer#render(PoseStack.Pose, MultiBufferSource, BlockStateModel, float, float, float, int, int, BlockAndTintGetter, BlockPos, BlockState)
+	 * @see FabricBlockModelRenderer#render(PoseStack.Pose, BlockVertexConsumerProvider, BlockStateModel, float, float, float, int, int, BlockAndTintGetter, BlockPos, BlockState)
 	 */
 	@ApiStatus.OverrideOnly
-	void render(PoseStack.Pose matrices, MultiBufferSource vertexConsumers, BlockStateModel model, float red, float green, float blue, int light, int overlay, BlockAndTintGetter blockView, BlockPos pos, BlockState state);
+	void render(PoseStack.Pose matrices, BlockVertexConsumerProvider vertexConsumers, BlockStateModel model, float red, float green, float blue, int light, int overlay, BlockAndTintGetter blockView, BlockPos pos, BlockState state);
 
 	/**
 	 * @see FabricBlockRenderManager#renderBlockAsEntity(BlockState, PoseStack, MultiBufferSource, int, int, BlockAndTintGetter, BlockPos)
 	 */
 	@ApiStatus.OverrideOnly
 	void renderBlockAsEntity(BlockRenderDispatcher renderManager, BlockState state, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay, BlockAndTintGetter blockView, BlockPos pos);
-
-	/**
-	 * @see FabricBlockModelPart#emitQuads(QuadEmitter, Predicate)
-	 */
-	@ApiStatus.Experimental
-	@ApiStatus.OverrideOnly
-	default void emitBlockModelPartQuads(BlockModelPart modelPart, QuadEmitter emitter, Predicate<@Nullable Direction> cullTest) {
-		VanillaBlockModelPartEncoder.emitQuads(modelPart, emitter, cullTest);
-	}
 
 	/**
 	 * @see FabricLayerRenderState#emitter()

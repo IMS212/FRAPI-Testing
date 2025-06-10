@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.impl.renderer;
+package net.fabricmc.fabric.mixin.renderer.client.sprite;
 
-import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
+import org.spongepowered.asm.mixin.Mixin;
+import net.fabricmc.fabric.api.renderer.v1.sprite.FabricErrorCollectingSpriteGetter;
 import net.minecraft.client.resources.model.SpriteGetter;
 
-public interface BasicItemModelExtension {
-	void fabric_setMesh(Mesh mesh, SpriteGetter spriteGetter);
+@Mixin(SpriteGetter.class)
+interface ErrorCollectingSpriteGetterMixin extends FabricErrorCollectingSpriteGetter {
 }

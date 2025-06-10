@@ -25,10 +25,11 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.fabricmc.fabric.api.renderer.v1.model.MeshBakedGeometry;
 import net.fabricmc.fabric.impl.renderer.BasicItemModelExtension;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.resources.model.QuadCollection;
 
 @Mixin(BlockModelWrapper.Unbaked.class)
-abstract class UnbakedBasicItemModelMixin {
+abstract class BasicItemModelUnbakedMixin {
 	@ModifyExpressionValue(method = "bake", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/model/ResolvedModel;bakeTopGeometry(Lnet/minecraft/client/renderer/block/model/TextureSlots;Lnet/minecraft/client/resources/model/ModelBaker;Lnet/minecraft/client/resources/model/ModelState;)Lnet/minecraft/client/resources/model/QuadCollection;"))
 	private QuadCollection captureMesh(QuadCollection geometry, @Share("mesh") LocalRef<Mesh> meshRef) {
 		if (geometry instanceof MeshBakedGeometry meshBakedGeometry) {
@@ -39,11 +40,11 @@ abstract class UnbakedBasicItemModelMixin {
 	}
 
 	@ModifyExpressionValue(method = "bake", at = @At(value = "NEW", target = "net/minecraft/client/renderer/item/BlockModelWrapper"))
-	private BlockModelWrapper injectMesh(BlockModelWrapper model, @Share("mesh") LocalRef<Mesh> meshRef) {
+	private BlockModelWrapper injectMesh(BlockModelWrapper model, ItemModel.BakingContext context, @Share("mesh") LocalRef<Mesh> meshRef) {
 		Mesh mesh = meshRef.get();
 
 		if (mesh != null) {
-			((BasicItemModelExtension) model).setMesh(mesh);
+			((BasicItemModelExtension) model).fabric_setMesh(mesh, context.blockModelBaker().sprites());
 		}
 
 		return model;

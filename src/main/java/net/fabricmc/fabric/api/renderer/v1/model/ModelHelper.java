@@ -69,7 +69,7 @@ public final class ModelHelper {
 	 * <p>Retrieves sprites from the block texture atlas via {@link SpriteFinder}.
 	 */
 	public static List<BakedQuad>[] toQuadLists(Mesh mesh) {
-		SpriteFinder finder = SpriteFinder.get(Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS));
+		SpriteFinder finder = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS).spriteFinder();
 
 		@SuppressWarnings("unchecked")
 		final ImmutableList.Builder<BakedQuad>[] builders = new ImmutableList.Builder[7];
@@ -78,12 +78,10 @@ public final class ModelHelper {
 			builders[i] = ImmutableList.builder();
 		}
 
-		if (mesh != null) {
-			mesh.forEach(q -> {
-				Direction cullFace = q.cullFace();
-				builders[cullFace == null ? NULL_FACE_ID : cullFace.get3DDataValue()].add(q.toBakedQuad(finder.find(q)));
-			});
-		}
+		mesh.forEach(q -> {
+			Direction cullFace = q.cullFace();
+			builders[cullFace == null ? NULL_FACE_ID : cullFace.get3DDataValue()].add(q.toBakedQuad(finder.find(q)));
+		});
 
 		@SuppressWarnings("unchecked")
 		List<BakedQuad>[] result = new List[7];

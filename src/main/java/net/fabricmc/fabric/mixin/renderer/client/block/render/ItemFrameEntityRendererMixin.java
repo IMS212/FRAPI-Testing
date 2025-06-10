@@ -32,7 +32,7 @@ import net.minecraft.world.level.block.state.BlockState;
 @Mixin(ItemFrameRenderer.class)
 abstract class ItemFrameEntityRendererMixin {
 	// Provide the BlockState as context.
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/ModelBlockRenderer;renderModel(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/renderer/block/model/BlockStateModel;FFFII)V"))
+	@Redirect(method = "render(Lnet/minecraft/client/renderer/entity/state/ItemFrameRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/ModelBlockRenderer;renderModel(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/renderer/block/model/BlockStateModel;FFFII)V"))
 	private void renderProxy(PoseStack.Pose matrices, VertexConsumer vertexConsumer, BlockStateModel model, float red, float green, float blue, int light, int overlay, @Local BlockState blockState) {
 		// The vertex consumer is for a special layer that renders solid, but vanilla has no equivalent
 		// cutout/translucent layers that we can use here without risking compatibility.

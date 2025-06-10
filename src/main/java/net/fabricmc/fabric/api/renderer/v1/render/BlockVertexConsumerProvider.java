@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.mixin.renderer.client.block.model;
+package net.fabricmc.fabric.api.renderer.v1.render;
 
-import java.util.List;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.block.model.multipart.MultiPartModel;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
-@Mixin(MultiPartModel.SharedBakedState.class)
-public interface MultipartBakedModelAccessor {
-	@Accessor("selectors")
-	List<MultiPartModel.Selector<BlockStateModel>> getSelectors();
+/**
+ * Like {@link MultiBufferSource}, but takes {@link ChunkSectionLayer} instead of {@link RenderType}. Primarily
+ * used to correctly render block models which have geometry on more than one layer.
+ *
+ * @see FabricBlockModelRenderer
+ */
+public interface BlockVertexConsumerProvider {
+	VertexConsumer getBuffer(ChunkSectionLayer layer);
 }

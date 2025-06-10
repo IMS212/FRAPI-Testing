@@ -31,7 +31,7 @@ import net.minecraft.world.level.EmptyBlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Note: This interface is automatically implemented on all block render managers via Mixin and interface injection.
+ * Note: This interface is automatically implemented on {@link BlockRenderDispatcher} via Mixin and interface injection.
  */
 public interface FabricBlockRenderManager {
 	/**

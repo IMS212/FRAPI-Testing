@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.impl.renderer;
+package net.fabricmc.fabric.api.renderer.v1.sprite;
 
-import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
-import net.minecraft.client.resources.model.SpriteGetter;
+import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
+import net.minecraft.client.renderer.texture.SpriteLoader;
 
-public interface BasicItemModelExtension {
-	void fabric_setMesh(Mesh mesh, SpriteGetter spriteGetter);
+/**
+ * Note: This interface is automatically implemented on {@link SpriteLoader.Preparations} via Mixin and interface injection.
+ */
+public interface FabricStitchResult {
+	/**
+	 * {@return the sprite finder for this stitch result}
+	 */
+	default SpriteFinder spriteFinder() {
+		throw new UnsupportedOperationException();
+	}
 }

@@ -17,14 +17,12 @@
 package net.fabricmc.fabric.impl.renderer;
 
 import java.util.Map;
-import java.util.function.Consumer;
 
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 
@@ -41,12 +39,12 @@ public class SpriteFinderImpl implements SpriteFinder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpriteFinderImpl.class);
 
 	private final Node root;
-	private final TextureAtlas spriteAtlasTexture;
+	private final TextureAtlasSprite missingSprite;
 	private int badSpriteCount = 0;
 
-	public SpriteFinderImpl(Map<ResourceLocation, TextureAtlasSprite> sprites, TextureAtlas spriteAtlasTexture) {
+	public SpriteFinderImpl(Map<ResourceLocation, TextureAtlasSprite> sprites, TextureAtlasSprite missingSprite) {
 		root = new Node(0.5f, 0.5f, 0.25f);
-		this.spriteAtlasTexture = spriteAtlasTexture;
+		this.missingSprite = missingSprite;
 		sprites.values().forEach(root::add);
 	}
 
@@ -72,9 +70,14 @@ public class SpriteFinderImpl implements SpriteFinder {
 		final float midU;
 		final float midV;
 		final float cellRadius;
+
+		@Nullable
 		Object lowLow = null;
+		@Nullable
 		Object lowHigh = null;
+		@Nullable
 		Object highLow = null;
+		@Nullable
 		Object highHigh = null;
 
 		Node(float midU, float midV, float radius) {
@@ -103,36 +106,37 @@ public class SpriteFinderImpl implements SpriteFinder {
 			final boolean highV = sprite.getV1() > midV + EPS;
 
 			if (lowU && lowV) {
-				addInner(sprite, lowLow, -1, -1, q -> lowLow = q);
+				lowLow = addInner(sprite, lowLow, -1, -1);
 			}
 
 			if (lowU && highV) {
-				addInner(sprite, lowHigh, -1, 1, q -> lowHigh = q);
+				lowHigh = addInner(sprite, lowHigh, -1, 1);
 			}
 
 			if (highU && lowV) {
-				addInner(sprite, highLow, 1, -1, q -> highLow = q);
+				highLow = addInner(sprite, highLow, 1, -1);
 			}
 
 			if (highU && highV) {
-				addInner(sprite, highHigh, 1, 1, q -> highHigh = q);
+				highHigh = addInner(sprite, highHigh, 1, 1);
 			}
 		}
 
-		private void addInner(TextureAtlasSprite sprite, Object quadrant, int uStep, int vStep, Consumer<Object> setter) {
+		private Object addInner(TextureAtlasSprite sprite, @Nullable Object quadrant, int uStep, int vStep) {
 			if (quadrant == null) {
-				setter.accept(sprite);
-			} else if (quadrant instanceof Node) {
-				((Node) quadrant).add(sprite);
+				return sprite;
+			} else if (quadrant instanceof Node node) {
+				node.add(sprite);
+				return quadrant;
 			} else {
 				Node n = new Node(midU + cellRadius * uStep, midV + cellRadius * vStep, cellRadius * 0.5f);
 
-				if (quadrant instanceof TextureAtlasSprite) {
-					n.add((TextureAtlasSprite) quadrant);
+				if (quadrant instanceof TextureAtlasSprite prevSprite) {
+					n.add(prevSprite);
 				}
 
 				n.add(sprite);
-				setter.accept(n);
+				return n;
 			}
 		}
 
@@ -144,22 +148,14 @@ public class SpriteFinderImpl implements SpriteFinder {
 			}
 		}
 
-		private TextureAtlasSprite findInner(Object quadrant, float u, float v) {
-			if (quadrant instanceof TextureAtlasSprite) {
-				return (TextureAtlasSprite) quadrant;
-			} else if (quadrant instanceof Node) {
-				return ((Node) quadrant).find(u, v);
+		private TextureAtlasSprite findInner(@Nullable Object quadrant, float u, float v) {
+			if (quadrant instanceof Node node) {
+				return node.find(u, v);
+			} else if (quadrant instanceof TextureAtlasSprite sprite) {
+				return sprite;
 			} else {
-				return spriteAtlasTexture.getSprite(MissingTextureAtlasSprite.getLocation());
+				return missingSprite;
 			}
 		}
-	}
-
-	public static SpriteFinderImpl get(TextureAtlas atlas) {
-		return ((SpriteFinderAccess) atlas).fabric_spriteFinder();
-	}
-
-	public interface SpriteFinderAccess {
-		SpriteFinderImpl fabric_spriteFinder();
 	}
 }

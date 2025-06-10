@@ -17,20 +17,23 @@
 package net.fabricmc.fabric.api.renderer.v1.model;
 
 import java.util.List;
-
-import org.jetbrains.annotations.ApiStatus;
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.TextureSlots;
+import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ModelDebugName;
+import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.QuadCollection;
+import net.minecraft.client.resources.model.UnbakedGeometry;
 
 /**
- * A special {@link QuadCollection} which hides a {@link Mesh} instead of using {@link BakedQuad}s. Instances of this
- * class always return empty lists from inherited methods.
+ * A special {@link QuadCollection} which hides a {@link Mesh} instead of using {@link BakedQuad}s. Useful for custom
+ * implementations of {@link UnbakedGeometry#bake(TextureSlots, ModelBaker, ModelState, ModelDebugName)} that want to return a
+ * mesh. Instances of this class always return empty lists from inherited methods.
  *
  * <p>Any code that interacts with {@link QuadCollection} should first check {@code instanceof MeshBakedGeometry} and use
  * {@link #getMesh()} if {@code true} or the vanilla methods otherwise.
  */
-@ApiStatus.Experimental
 public final class MeshBakedGeometry extends QuadCollection {
 	private final Mesh mesh;
 

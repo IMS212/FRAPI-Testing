@@ -37,4 +37,20 @@ import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(SnowGolemHeadLayer.class)
 abstract class SnowGolemPumpkinFeatureRendererMixin {
+	@Shadow
+	@Final
+	private BlockRenderDispatcher blockRenderer;
+
+	@Redirect(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/renderer/entity/state/SnowGolemRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/ModelBlockRenderer;renderModel(Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/renderer/block/model/BlockStateModel;FFFII)V"))
+	private void renderProxy(PoseStack.Pose entry, VertexConsumer vertexConsumer, BlockStateModel model, float red, float green, float blue, int light, int overlay, PoseStack matrices, MultiBufferSource vertexConsumers, int light1, SnowGolemRenderState renderState, float f, float g, @Local BlockState blockState) {
+		// If true, the vertex consumer is for an outline render layer, and we want all geometry to go into this vertex
+		// consumer.
+		if (renderState.appearsGlowing && renderState.isInvisible) {
+			// Fix tinted quads being rendered completely black and provide the BlockState as context.
+			FabricBlockModelRenderer.render(entry, layer -> vertexConsumer, model, 1, 1, 1, light, overlay, EmptyBlockAndTintGetter.INSTANCE, BlockPos.ZERO, blockState);
+		} else {
+			// Support multi-render layer models, fix tinted quads being rendered completely black, and provide the BlockState as context.
+			FabricBlockModelRenderer.render(entry, RenderLayerHelper.entityDelegate(vertexConsumers), model, 1, 1, 1, light, overlay, EmptyBlockAndTintGetter.INSTANCE, BlockPos.ZERO, blockState);
+		}
+	}
 }

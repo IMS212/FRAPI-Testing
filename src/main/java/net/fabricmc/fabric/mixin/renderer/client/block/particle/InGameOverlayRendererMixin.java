@@ -34,4 +34,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ScreenEffectRenderer.class)
 abstract class InGameOverlayRendererMixin {
+	@Redirect(method = "renderScreenEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/block/BlockModelShaper;getParticleIcon(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;"))
+	private TextureAtlasSprite getModelParticleSpriteProxy(BlockModelShaper models, BlockState p_110883_, BlockAndTintGetter level, BlockPos pos, @Local Player playerEntity) {
+		return models.getModelParticleSprite(p_110883_, level, pos);
+	}
 }

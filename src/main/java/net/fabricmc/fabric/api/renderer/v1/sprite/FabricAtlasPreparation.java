@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.impl.renderer;
+package net.fabricmc.fabric.api.renderer.v1.sprite;
 
-import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
-import net.minecraft.client.resources.model.SpriteGetter;
+import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
+import net.minecraft.client.resources.model.AtlasSet;
 
-public interface BasicItemModelExtension {
-	void fabric_setMesh(Mesh mesh, SpriteGetter spriteGetter);
+/**
+ * Note: This interface is automatically implemented on {@link AtlasSet.StitchResult} via Mixin and interface injection.
+ */
+public interface FabricAtlasPreparation {
+	/**
+	 * {@return the sprite finder for this atlas preparation}
+	 */
+	default SpriteFinder spriteFinder() {
+		throw new UnsupportedOperationException();
+	}
 }

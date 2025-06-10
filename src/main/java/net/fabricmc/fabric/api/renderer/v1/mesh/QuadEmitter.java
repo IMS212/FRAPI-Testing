@@ -21,8 +21,10 @@ import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 
@@ -76,7 +78,10 @@ public interface QuadEmitter extends MutableQuadView {
 	}
 
 	@Override
-	QuadEmitter spriteBake(TextureAtlasSprite sprite, int bakeFlags);
+	default QuadEmitter spriteBake(TextureAtlasSprite sprite, int bakeFlags) {
+		MutableQuadView.super.spriteBake(sprite, bakeFlags);
+		return this;
+	}
 
 	default QuadEmitter uvUnitSquare() {
 		uv(0, 0, 0);
@@ -90,8 +95,8 @@ public interface QuadEmitter extends MutableQuadView {
 	QuadEmitter lightmap(int vertexIndex, int lightmap);
 
 	@Override
-	default QuadEmitter lightmap(int b0, int b1, int b2, int b3) {
-		MutableQuadView.super.lightmap(b0, b1, b2, b3);
+	default QuadEmitter lightmap(int l0, int l1, int l2, int l3) {
+		MutableQuadView.super.lightmap(l0, l1, l2, l3);
 		return this;
 	}
 
@@ -111,13 +116,28 @@ public interface QuadEmitter extends MutableQuadView {
 	}
 
 	@Override
-	QuadEmitter cullFace(@Nullable Direction face);
-
-	@Override
 	QuadEmitter nominalFace(@Nullable Direction face);
 
 	@Override
-	QuadEmitter material(RenderMaterial material);
+	QuadEmitter cullFace(@Nullable Direction face);
+
+	@Override
+	QuadEmitter renderLayer(@Nullable ChunkSectionLayer renderLayer);
+
+	@Override
+	QuadEmitter emissive(boolean emissive);
+
+	@Override
+	QuadEmitter diffuseShade(boolean shade);
+
+	@Override
+	QuadEmitter ambientOcclusion(TriState ao);
+
+	@Override
+	QuadEmitter glint(@Nullable ItemStackRenderState.FoilType glint);
+
+	@Override
+	QuadEmitter shadeMode(ShadeMode mode);
 
 	@Override
 	QuadEmitter tintIndex(int tintIndex);
@@ -125,13 +145,14 @@ public interface QuadEmitter extends MutableQuadView {
 	@Override
 	QuadEmitter tag(int tag);
 
+	@Override
 	QuadEmitter copyFrom(QuadView quad);
 
 	@Override
-	QuadEmitter fromVanilla(int[] quadData, int startIndex);
+	QuadEmitter fromVanilla(int[] vertexData, int startIndex);
 
 	@Override
-	QuadEmitter fromVanilla(BakedQuad quad, RenderMaterial material, @Nullable Direction cullFace);
+	QuadEmitter fromBakedQuad(BakedQuad quad);
 
 	/**
 	 * Tolerance for determining if the depth parameter to {@link #square(Direction, float, float, float, float, float)}

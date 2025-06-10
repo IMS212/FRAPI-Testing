@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
@@ -34,7 +32,7 @@ import net.minecraft.world.level.EmptyBlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Note: This interface is automatically implemented on all block model renderers via Mixin and interface injection.
+ * Note: This interface is automatically implemented on {@link ModelBlockRenderer} via Mixin and interface injection.
  */
 public interface FabricBlockModelRenderer {
 	/**
@@ -43,8 +41,8 @@ public interface FabricBlockModelRenderer {
 	 * and
 	 * {@link BlockRenderDispatcher#renderBatched(BlockState, BlockPos, BlockAndTintGetter, PoseStack, VertexConsumer, boolean, List)}
 	 * that accepts a {@link BlockStateModel} instead of a {@code List<BlockModelPart>} and a
-	 * {@link MultiBufferSource} instead of a {@link VertexConsumer}. Also accepts the random seed. <b>Prefer using
-	 * this method over the vanilla alternative to correctly retrieve geometry from models that implement
+	 * {@link BlockVertexConsumerProvider} instead of a {@link VertexConsumer}. Also accepts the random seed. <b>Prefer
+	 * using this method over the vanilla alternative to correctly retrieve geometry from models that implement
 	 * {@link BlockStateModel#emitQuads(QuadEmitter, BlockAndTintGetter, BlockPos, BlockState, RandomSource, Predicate)} and to
 	 * correctly buffer models that have geometry on multiple render layers.</b>
 	 *
@@ -57,21 +55,19 @@ public interface FabricBlockModelRenderer {
 	 * @param state The block state.
 	 * @param pos The position of the block in the world.
 	 * @param matrices The matrix stack.
-	 * @param vertexConsumers The vertex consumers. <b>The {@link RenderType} passed to
-	 *                        {@link MultiBufferSource#getBuffer(RenderType)} is guaranteed to be one of
-	 *                        {@link RenderType#chunkBufferLayers()}</b>.
+	 * @param vertexConsumers The vertex consumers.
 	 * @param cull Whether to try to cull faces hidden by other blocks.
 	 * @param seed The random seed. Usually retrieved by the caller from {@link BlockState#getSeed(BlockPos)}.
 	 * @param overlay The overlay value to pass to output {@link VertexConsumer}s.
 	 */
-	default void render(BlockAndTintGetter blockView, BlockStateModel model, BlockState state, BlockPos pos, PoseStack matrices, MultiBufferSource vertexConsumers, boolean cull, long seed, int overlay) {
+	default void render(BlockAndTintGetter blockView, BlockStateModel model, BlockState state, BlockPos pos, PoseStack matrices, BlockVertexConsumerProvider vertexConsumers, boolean cull, long seed, int overlay) {
 		Renderer.get().render((ModelBlockRenderer) this, blockView, model, state, pos, matrices, vertexConsumers, cull, seed, overlay);
 	}
 
 	/**
 	 * Alternative for
 	 * {@link ModelBlockRenderer#renderModel(PoseStack.Pose, VertexConsumer, BlockStateModel, float, float, float, int, int)}
-	 * that accepts a {@link MultiBufferSource} instead of a {@link VertexConsumer}. Also accepts the
+	 * that accepts a {@link BlockVertexConsumerProvider} instead of a {@link VertexConsumer}. Also accepts the
 	 * {@link BlockAndTintGetter}, {@link BlockPos}, and {@link BlockState} to pass to
 	 * {@link BlockStateModel#emitQuads(QuadEmitter, BlockAndTintGetter, BlockPos, BlockState, RandomSource, Predicate)} when
 	 * necessary. <b>Prefer using this method over the vanilla alternative to correctly buffer models that have geometry
@@ -81,9 +77,7 @@ public interface FabricBlockModelRenderer {
 	 * entity renderers.
 	 *
 	 * @param matrices The matrices.
-	 * @param vertexConsumers The vertex consumers. <b>The {@link RenderType} passed to
-	 *                        {@link MultiBufferSource#getBuffer(RenderType)} is guaranteed to be one of
-	 *                        {@link RenderType#chunkBufferLayers()}</b>.
+	 * @param vertexConsumers The vertex consumers.
 	 * @param model The model to render.
 	 * @param red The red component of the tint color.
 	 * @param green The green component of the tint color.
@@ -95,7 +89,7 @@ public interface FabricBlockModelRenderer {
 	 *            </b>
 	 * @param state The block state. <b>Should be {@code Blocks.AIR.getDefaultState()} if not applicable.</b>
 	 */
-	static void render(PoseStack.Pose matrices, MultiBufferSource vertexConsumers, BlockStateModel model, float red, float green, float blue, int light, int overlay, BlockAndTintGetter blockView, BlockPos pos, BlockState state) {
+	static void render(PoseStack.Pose matrices, BlockVertexConsumerProvider vertexConsumers, BlockStateModel model, float red, float green, float blue, int light, int overlay, BlockAndTintGetter blockView, BlockPos pos, BlockState state) {
 		Renderer.get().render(matrices, vertexConsumers, model, red, green, blue, light, overlay, blockView, pos, state);
 	}
 }

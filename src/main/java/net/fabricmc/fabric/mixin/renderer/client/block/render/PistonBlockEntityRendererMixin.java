@@ -35,4 +35,9 @@ abstract class PistonBlockEntityRendererMixin {
 	@Final
 	private BlockRenderDispatcher blockRenderer;
 
+	// Support multi-render layer models.
+	@Overwrite
+	private void renderBlock(BlockPos pos, BlockState state, PoseStack matrices, MultiBufferSource vertexConsumers, Level world, boolean cull, int overlay) {
+		blockRenderer.getModelRenderer().render(world, blockRenderer.getBlockModel(state), state, pos, matrices, RenderLayerHelper.movingDelegate(vertexConsumers), cull, state.getSeed(pos), overlay);
+	}
 }

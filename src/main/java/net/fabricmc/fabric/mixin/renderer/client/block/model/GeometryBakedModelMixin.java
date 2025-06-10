@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.MeshBakedGeometry;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.SimpleModelWrapper;
 import net.minecraft.client.resources.model.QuadCollection;
@@ -34,11 +35,26 @@ abstract class GeometryBakedModelMixin implements BlockModelPart {
 	@Shadow
 	@Final
 	private QuadCollection quads;
+	@Shadow
+	@Final
+	private boolean useAmbientOcclusion;
 
 	@Override
 	public void emitQuads(QuadEmitter emitter, Predicate<@Nullable Direction> cullTest) {
 		if (quads instanceof MeshBakedGeometry meshBakedGeometry) {
-			meshBakedGeometry.getMesh().outputTo(emitter);
+			if (useAmbientOcclusion) {
+				meshBakedGeometry.getMesh().outputTo(emitter);
+			} else {
+				emitter.pushTransform(quad -> {
+					if (quad.ambientOcclusion() == TriState.DEFAULT) {
+						quad.ambientOcclusion(TriState.FALSE);
+					}
+
+					return true;
+				});
+				meshBakedGeometry.getMesh().outputTo(emitter);
+				emitter.popTransform();
+			}
 		} else {
 			BlockModelPart.super.emitQuads(emitter, cullTest);
 		}

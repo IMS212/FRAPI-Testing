@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '1.0.21'
+    id 'net.neoforged.moddev' version '2.0.42-beta'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -18,16 +18,18 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+
     maven {
-        name 'Maven for PR #2039' // https://github.com/neoforged/NeoForge/pull/2039
-        url 'https://prmaven.neoforged.net/NeoForge/pr2039'
+        url "https://maven.su5ed.dev/releases"
+    }
+
+    maven {
+        name 'Maven for PR #2297' // https://github.com/neoforged/NeoForge/pull/2297
+        url 'https://prmaven.neoforged.net/NeoForge/pr2297'
         content {
             includeModule('net.neoforged', 'neoforge')
             includeModule('net.neoforged', 'testframework')
         }
-    }
-    maven {
-        url "https://maven.su5ed.dev/releases"
     }
 
 }
@@ -161,11 +163,19 @@ publishing {
     publications {
         register('mavenJava', MavenPublication) {
             from components.java
+            groupId = "net.caffeinemc"
+            artifactId = "fabric-renderer-api-v1"
+            version = "7.0.0"
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/IMS212/FRAPI-Testing"
+            credentials {
+                username = "IMS212"
+                password = System.getenv("GITHUB_TOKEN")
+            }
         }
     }
 }
@@ -174,13 +184,6 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
-// IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
-idea {
-    module {
-        downloadSources = true
-        downloadJavadoc = true
-    }
-}
 
 processResources {
     duplicatesStrategy = DuplicatesStrategy.WARN

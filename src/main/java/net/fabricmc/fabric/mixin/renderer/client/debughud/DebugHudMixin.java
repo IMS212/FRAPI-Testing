@@ -27,7 +27,7 @@ import net.minecraft.client.gui.components.DebugScreenOverlay;
 
 @Mixin(DebugScreenOverlay.class)
 public class DebugHudMixin {
-	@Inject(at = @At("RETURN"), method = "getSystemInformation")
+	@Inject(at = @At("RETURN"), method = "getGameInformation")
 	protected void getLeftText(CallbackInfoReturnable<List<String>> info) {
 		info.getReturnValue().add("[Fabric] Active renderer: " + Renderer.get().getClass().getSimpleName());
 	}

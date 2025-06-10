@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.impl.renderer;
+package net.fabricmc.fabric.mixin.renderer.client.item;
 
-import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh;
-import net.minecraft.client.resources.model.SpriteGetter;
+import org.spongepowered.asm.mixin.Mixin;
+import net.fabricmc.fabric.api.renderer.v1.render.FabricLayerRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 
-public interface BasicItemModelExtension {
-	void fabric_setMesh(Mesh mesh, SpriteGetter spriteGetter);
+@Mixin(ItemStackRenderState.LayerRenderState.class)
+abstract class ItemRenderStateLayerRenderStateMixin implements FabricLayerRenderState {
 }
